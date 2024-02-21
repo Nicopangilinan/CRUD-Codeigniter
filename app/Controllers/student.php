@@ -4,26 +4,21 @@ namespace App\Controllers;
 
 use CodeIgniter\Controller;
 use App\Models\StudentModel;
+use App\Models\GradeModel;
 
 class Student extends Controller
-{   
+{
 
     public function index()
     {
         $model = new StudentModel();
 
-        $data['students_detail'] = $model->orderBy('student_id', 'DESC')->findAll();
+        $data['students_detail'] = $model->orderBy('id', 'DESC')->findAll();
 
         return view('list', $data);
+        
     }
-
-    public function getStudentGrades()
-    {
-        $student_id = $this->request->getPost('student_id');
-        $model = new StudentModel();
-        $grades = $model->getStudentGrades($student_id);
-        echo json_encode($grades);
-    }
+    
 
     public function store()
     {
@@ -39,7 +34,7 @@ class Student extends Controller
         $save = $model->insert_data($data);
         if($save != false)
         {
-            $data = $model->where('student_id',$save) -> first();
+            $data = $model->where('id',$save) -> first();
             echo json_encode(array("status" => true , 'data' => $data));
         }
         else{
@@ -52,7 +47,7 @@ class Student extends Controller
         
      $model = new StudentModel();
       
-     $data = $model->where('student_id', $id)->first();
+     $data = $model->where('id', $id)->first();
        
     if($data){
             echo json_encode(array("status" => true , 'data' => $data));
@@ -60,6 +55,65 @@ class Student extends Controller
             echo json_encode(array("status" => false));
         }
     }
+
+    public function view($id = null)
+    {
+        
+     $model = new StudentModel();
+      
+     $data = $model->where('id', $id)->first();
+       
+    if($data){
+            echo json_encode(array("status" => true , 'data' => $data));
+        }else{
+            echo json_encode(array("status" => false));
+        }
+    }
+
+    public function viewGrades($id = null)
+    {
+        $gradeModel = new GradeModel();
+        // Assuming you want to fetch grades for a specific student
+        $grades = $gradeModel->where('id', $id)->findAll(); // Assuming student_id is the foreign key in the grades table
+
+        if ($grades) {
+            echo json_encode(array("status" => true, 'data' => $grades));
+        } else {
+            echo json_encode(array("status" => false));
+        }
+    }
+
+    public function storeGrades()
+{
+    helper(['form', 'url']);
+
+    $gradeModel = new GradeModel();
+
+    // Retrieve form data
+    $data = [
+        'subject' => $this->request->getVar('txtSubject'),
+        'grade' => $this->request->getVar('txtGrade'),
+        // Get the student ID from the POST data
+        'id' => $this->request->getVar('student_id'),
+    ];
+
+    // Insert data into the database
+    $save = $gradeModel->insert($data);
+
+    if ($save) {
+        // Retrieve the inserted grade data
+        $gradeData = $gradeModel->find($save);
+
+        // Return a JSON response with the inserted grade data
+        echo json_encode(array("status" => true, 'data' => $gradeData));
+    } else {
+        // Return a JSON response indicating failure
+        echo json_encode(array("status" => false));
+    }
+}
+
+
+    
 
     public function update()
     {  
@@ -79,7 +133,7 @@ class Student extends Controller
         $update = $model->update($id,$data);
         if($update != false)
         {
-            $data = $model->where('student_id', $id)->first();
+            $data = $model->where('id', $id)->first();
             echo json_encode(array("status" => true , 'data' => $data));
         }
         else{
@@ -89,7 +143,7 @@ class Student extends Controller
 
     public function delete ($id = null) {
          $model = new StudentModel();
-         $delete = $model->where('student_id', $id)->delete();
+         $delete = $model->where('id', $id)->delete();
          if ($delete)
          {
             echo json_encode(array("status" => true));
@@ -98,5 +152,5 @@ class Student extends Controller
          }
     }
 
-}
 
+    }

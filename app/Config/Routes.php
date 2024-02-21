@@ -8,10 +8,20 @@ use CodeIgniter\Router\RouteCollection;
 $routes->get('/', 'Home::index');
 
 
-// CRUD Routes
+// CRUD Routes (student)
 $routes->get('student', 'Student::index');
 $routes->post('student/store', 'Student::store');
 $routes->get('student/edit/(:num)', 'Student::edit/$1');
 $routes->get('student/delete/(:num)', 'Student::delete/$1');
+$routes->get('student/view/(:num)', 'Student::view/$1');
 $routes->post('student/update', 'Student::update');
-$routes->post('student/getStudentGrades', 'Student::getStudentGrades');
+// CRUD Routes (Grades)
+$routes->get('student/viewGrades/(:num)', 'Student::viewGrades/$1');
+$routes->post('student/storeGrades', 'Student::storeGrades');
+
+
+// Grades Routes
+$routes->get('grades', 'grade::index');
+
+
+

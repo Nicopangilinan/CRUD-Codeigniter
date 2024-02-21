@@ -7,36 +7,40 @@ use CodeIgniter\Model;
 class StudentModel extends Model
 {
     protected $table = 'students';
-
+    protected $table2 = 'grades';
     protected $allowedFields = ['first_name','last_name', 'address'];
 
     public function __construct(){
-        parent:: __construct();
-        //$this->load->database::connect():
-        $db = \Config\Database::connect();
-        $builder = $db->table('students');
+        parent::__construct(); // Call the parent constructor
     }
 
     public function insert_data($data) {
-        if($this->db->table($this->table)->insert($data))
-        {
+        // Attempt to insert data into the 'students' table
+        if ($this->db->table($this->table)->insert($data)) {
+            // If insertion is successful, return the ID of the inserted row
             return $this->db->insertID();
-        }
-        else
-        {
+        } else {
+            // If insertion fails, return false
             return false;
         }
     }
 
-    // Example database query in StudentModel
-    public function getStudentGrades($student_id) {
-        $query = $this->db->where('student_id', $student_id)->get('grades');
-        if ($query) {
-            return $query->result();
-        } else {
-            // Handle error
-            return false;
-        }
+    public function getGradesById($id) {
+
+        $query = $this->db->table('grades');
+
+
+        $query->where('id', $id);
+
+
+        $results = $query->get()->getResult();
+
+
+        return $results;
     }
-}
+
+
+    }
+    
+    
 ?>
