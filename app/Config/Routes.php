@@ -18,6 +18,13 @@ $routes->post('student/update', 'Student::update');
 // CRUD Routes (Grades)
 $routes->get('student/viewGrades/(:num)', 'Student::viewGrades/$1');
 $routes->post('student/storeGrades', 'Student::storeGrades');
+$routes->get('student/editGrades/(:num)', 'Student::editGrades/$1');
+$routes->get('student/deleteGrades/(:num)', 'Student::deleteGrades/$1');
+$routes->post('student/updateGrades/(:num)', 'Student::updateGrades/$1');
+
+// CRUD ROUTES (subject)
+$routes->get('subject', 'subject::index');
+
 
 
 // Grades Routes

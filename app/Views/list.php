@@ -10,13 +10,22 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css">
     <script type="text/javascript" src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.js   "></script>
-
 </head>
+
+
 <body>
+<ul class="nav nav-pills">
+  <li class="nav-item">
+    <a class="nav-link active" aria-current="page" href="/student">Students</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="/subject">Subjects</a>
+  </li>
+</ul>
     <div class="container"><br/><br/>
         <div class="row">
             <div class="col-lg-10">
-                <h2> CodeIgniter CRUD test</h2>
+                <h2> Students's List </h2>
             </div>
             <div class="col-lg-2">
                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">
@@ -118,7 +127,7 @@
             </div>
         </div>
 
-        <!-- First Modal -->
+        <!-- ADD GRADE MODAL -->
 <div class="modal fade" id="addGradeModal" aria-labelledby="addGradeModalLabel" tabindex="-1" style="display: none;" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -127,14 +136,14 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <!-- Add form inputs for subject and grade -->
+               
                 <form id="addGrade" name="addGrade" action="<?php echo site_url('student/storeGrades');?>" method="post">
                 <div class="modal-body">
                     <div class="form-group">
                         <label for="txtSubject">Subject:</label>
                         <select class="form-select" id="subject" id="txtSubject" name="txtSubject" >
                         <option value="" disabled selected>Please select a subject..</option>
-                        <option value="Math">Math</option>
+                        <option value="Math">Mathematics</option>
                         <option value="Science">Science</option>
                         <option value="English">English</option>
                         <option value="History">History</option>
@@ -148,6 +157,7 @@
                         <label for="txtGrade">Grade:</label>
                         <input type="text" class="form-control" id="txtGrade" placeholder="Please Enter Grade" name="txtGrade">
                     </div>
+                    
                     <input type="hidden" id="studentIdInput" name="student_id">
 
                 </div>
@@ -164,7 +174,7 @@
     </div>
 </div>
 
-<!-- Second Modal -->
+<!-- VIEW GRADE MODAL -->
 <div class="modal fade" id="viewModal" aria-labelledby="viewModalLabel" tabindex="-1" style="display: none;" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -178,17 +188,18 @@
                     <thead>
                         <tr>
                             <th>Subject</th>
-                            <th>Grade</th>
+                            <th scope="row">Grade</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- Grade details will be displayed here -->
+                        <!-- Grade details -->
                     </tbody>
                 </table>
             </div>
-            <div class="modal-footer">
+            <div id="addGradeButton" class="modal-footer">
+            <a  id="btnAddGrade" class="btn btn-primary" data-bs-target="#addGradeModal" data-bs-toggle="modal" data-bs-dismiss="modal">Add Grade</a>
                 <!-- Button to toggle back to the first modal -->
-                <button class="btn btn-primary" data-bs-target="#addGradeModal" data-bs-toggle="modal" data-bs-dismiss="modal"  >Add Grade</button>
             </div>
         </div>
     </div>
@@ -278,37 +289,84 @@
                 var fullName = 'Student: ' + res.data.first_name + ' ' + res.data.last_name;
                 $('.nameStudent').text(fullName);
 
+                let hiddenId = document.getElementById("studentIdInput");
+                        hiddenId.value = student_id;
+                        console.log(hiddenId.value);
                 // Show the modal
-                $('#viewModal').modal('show');
-
+                $('#viewModal').modal('show'); 
                 // Fetch grade details using gradeId
                 $.ajax({
-                    url: 'student/viewGrades/' + student_id,
-                    type: "GET",
-                    dataType: 'json',
-                    success: function (gradeRes) {
-                        if (gradeRes.status && gradeRes.data.length > 0) {
-                            // Clear the previous content
-                            $('#viewTable tbody').empty();
+                url: 'student/viewGrades/' + student_id,
+                type: "GET",
+                dataType: 'json',
+                success: function (gradeRes) {
+                if (gradeRes.status && gradeRes.data.length > 0) {
+                    // Clear the previous content
+                    $('#viewTable tbody').empty();
 
-                            // Loop through each grade record and append it to the table body
-                            gradeRes.data.forEach(function(grade) {
-                                var row = '<tr>';
-                             // Assuming you have a gradeId field
-                                row += '<td>' + grade.subject + '</td>';
-                                row += '<td>' + grade.grade + '</td>';
-                                row += '</tr>';
+                    // Loop through each grade record and append it to the table body
+                    gradeRes.data.forEach(function(grade) {
+                        var row = '<tr>';
+                        // Assuming you have a gradeId field
+                        row += '<td class="editable" id="txtSubject" name="txtSubject">' + grade.subject + '</td>';
+                        row += '<td class="editable" id="txtGrade" name="txtGrade">' + grade.grade + '</td>';
+                        row += '<td><button class="btn btn-danger btnDeleteGrd" data-gradeid="' + grade.grade_id + '">Delete</button> <button class="btn btn-primary btnEditGrd" data-gradeid="' + grade.grade_id + '">Edit</button></td>';
+                        row += '</tr>';
 
-                                $('#viewTable tbody').append(row);
-                            });
+                        $('#viewTable tbody').append(row);
+                    });
 
-                        } else {
-                                // Display "no grades found" message
-                                $('#viewTable tbody').html('<tr><td colspan="2">No grades found</td></tr>');
+                    // Edit Button Click Handler
+                    // Edit Button Click Handler
+                    $('.btnEditGrd').on('click', function() {
+                    var $row = $(this).closest('tr');
+                    var $editableCells = $row.find('.editable');
+
+                    // Toggle contenteditable attribute for editable cells
+                    $editableCells.prop('contenteditable', function(i, attr) {
+                        return attr === 'true' ? false : true;
+                    });
+
+                    // Toggle button text between Edit and Save
+                    var $btnEdit = $(this);
+                    var buttonText = $btnEdit.text();
+                    $btnEdit.text(buttonText === 'Edit' ? 'Save' : 'Edit');
+
+                    // If the button text is 'Save', update the database
+                    if (buttonText === 'Save') {
+                        var grade_id = $btnEdit.data('gradeid');
+                        var newData = {
+                            txtSubject: $row.find('#txtSubject').text(),
+                            txtGrade: $row.find('#txtGrade').text()
+                        };
+
+                        // Send the updated data to the server
+                        $.ajax({
+                            url: 'student/updateGrades/' + grade_id,
+                            type: 'POST',
+                            dataType: 'json',
+                            data: newData,
+                            success: function(response) {
+                                if (response.status) {
+                                    console.log('Update successful');
+                                } else {
+                                    console.error('Update failed');
+                                }
+                            },
+                            error: function(xhr, status, error) {
+                                console.error('Error:', error);
+                                console.log(newData)
                             }
-                            
-                    },
+                        });
+                    }
+                });
 
+
+                } else {
+                    // Display "no grades found" message
+                    $('#viewTable tbody').html('<tr><td colspan="3">No grades found</td></tr>');
+                }
+            },
                     error: function (xhr, status, error) {
                         // Handle error
                         console.error("Error fetching grade data:", xhr, status, error);
@@ -359,54 +417,58 @@
             });
         }
     }); 
-
+       //DELETE STUDENT
     $('body').on('click', '.btnDelete', function () {
         var student_id = $(this).attr('data-id');
         $.get('student/delete/'+student_id, function (data) {
             $('#studentTable tbody #'+ student_id).remove();
         })
     });  
+        //DELETE GRADE
+        $('body').on('click', '.btnDeleteGrd', function () {
+            var grade_id = $(this).attr('data-gradeid');
+            var $row = $(this).closest('tr'); // Find the closest row to the clicked button
+            $.get('student/deleteGrades/'+grade_id, function (data) {
+                // On success, remove the corresponding row from the table
+                $row.remove();
+            });
+        });
+
 
     $(document).ready(function() {
-    $('#addGrade').submit(function(e) {
-        e.preventDefault(); // Prevent the form from submitting normally
-        
-        // Retrieve the data-id attribute from the button
-        var student_id = $(this).attr('data-id');
-        console.log(student_id); // Check if the student_id is correctly captured
-
-        // Get form data
-        var formData = $(this).serialize();
-
-        // Append studentId to the formData
-        formData += '&student_id=' + student_id;
-
-        // Send AJAX request
-        $.ajax({
-            url: 'student/storeGrades',
-            type: 'POST',
-            data: formData,
-            dataType: 'json',
-            success: function(response) {
-                // Handle the response from the server
-                if (response.status) {
-                    alert('Grade added successfully!');
-                    // Optionally, you can close the modal or clear the form fields
-                    $('#addGradeModal').modal('hide');
-                    $('#addGrade')[0].reset(); // Reset the form fields
-                } else {
-                    alert('Failed to add grade. Please try again.');
-                }
-            },
-            error: function(xhr, status, error) {
-                console.error("Error:", xhr, status, error);
-                alert('An error occurred while processing your request. Please try again later.');
-            }
+            $('#addGrade').submit(function(e) {
+                e.preventDefault(); // Prevent the form from submitting normally
+               
+                // Get form data
+                var formData = $(this).serialize();
+         
+                console.log(formData);
+         
+                // Send AJAX request
+                $.ajax({
+                    url: 'student/storeGrades',
+                    type: 'POST',
+                    data: formData,
+                    dataType: 'json',
+                    success: function(response) {
+                        // Handle the response from the server
+                        if (response.status) {
+                            alert('Grade added successfully!');
+                            // Optionally, you can close the modal or clear the form fields
+                            $('#addGradeModal').modal('hide');
+                            $('#addGrade')[0].reset(); // Reset the form fields
+                        } else {
+                            alert('Failed to add grade. Please try again.');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error:", xhr, status, error);
+                        alert('An error occurred while processing your request. Please try again later.');
+                    }
+                });
+            });
         });
-    });
-});
-
-
+   
 </script>
 
 </body>
