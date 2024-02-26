@@ -7,12 +7,13 @@ use CodeIgniter\Model;
 class StudentModel extends Model
 {
     protected $table = 'students';
-    protected $table2 = 'grades';
     protected $allowedFields = ['first_name','last_name', 'address'];
 
     public function __construct(){
         parent::__construct(); // Call the parent constructor
     }
+
+    
 
     public function insert_data($data) {
         // Attempt to insert data into the 'students' table

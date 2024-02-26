@@ -13,34 +13,39 @@ class Student extends Controller
     {
         $model = new StudentModel();
 
-        $data['students_detail'] = $model->orderBy('id', 'DESC')->findAll();
+        $students = $model->select('students.*, student_number.student_number')
+        ->join('student_number', 'student_number.id = students.id')
+        ->orderBy('students.id', 'DESC')
+        ->findAll();
 
-        return view('list', $data);
-        
+        $data['students_detail'] = $students;
+
+        return view('list', $data);    
     }
     
 
-    public function store()
-    {
-        helper(['form', 'url']);
+   public function store()
+{
+    helper(['form', 'url']);
 
-        $model = new StudentModel();
+    $model = new StudentModel();
 
-        $data = [
-            'first_name' => $this->request->getVar('txtFirstName'),
-            'last_name' => $this->request->getVar('txtLastName'),
-            'address' => $this->request->getVar('txtAddress'),
-        ];
-        $save = $model->insert_data($data);
-        if($save != false)
-        {
-            $data = $model->where('id',$save) -> first();
-            echo json_encode(array("status" => true , 'data' => $data));
-        }
-        else{
-            echo json_encode(array("status" => false , 'data => $data'));
-        }
+    $data = [
+        'first_name' => $this->request->getVar('txtFirstName'),
+        'last_name' => $this->request->getVar('txtLastName'),
+        'address' => $this->request->getVar('txtAddress'),
+    ];
+
+    $save = $model->insert_data($data);
+
+    if ($save != false) {
+        $data = $model->where('id', $save)->first();
+        echo json_encode(array("status" => true, 'data' => $data));
+    } else {
+        echo json_encode(array("status" => false, 'data' => $data));
     }
+}
+
 
     public function edit($id = null)
     {

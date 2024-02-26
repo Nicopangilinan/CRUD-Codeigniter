@@ -14,12 +14,12 @@
 
 
 <body>
-<ul class="nav nav-pills">
+<ul class="nav nav-tabs">
   <li class="nav-item">
-    <a class="nav-link active" aria-current="page" href="/student">Students</a>
+    <a class="nav-link active" aria-current="page" href="/student">Student List</a>
   </li>
   <li class="nav-item">
-    <a class="nav-link" href="/subject">Subjects</a>
+    <a class="nav-link" href="/subject">Subject List</a>
   </li>
 </ul>
     <div class="container"><br/><br/>
@@ -40,6 +40,7 @@
                     <th>First Name</th>
                     <th>Last Name</th>
                     <th>Address</th>
+                    <th>Phone Number</th>
                     <th width="280px">Action</th>
                 </tr>
             </thead>
@@ -52,6 +53,7 @@
                 <td><?php echo $row ['first_name']; ?></td>
                 <td><?php echo $row ['last_name']; ?></td>
                 <td><?php echo $row ['address']; ?></td>
+                <td><?php echo $row ['student_number']; ?></td>
                 <td>
                     <a data-id="<?php echo $row ['id']; ?>" class="btn btn-primary btnEdit">Edit</a>
                     <a data-id="<?php echo $row ['id']; ?>" class="btn btn-danger btnDelete">Delete</a>
@@ -188,7 +190,7 @@
                     <thead>
                         <tr>
                             <th>Subject</th>
-                            <th scope="row">Grade</th>
+                            <th>Grade</th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -280,7 +282,7 @@
         $('body').on('click', '.btnView', function () {
     var student_id = $(this).attr('data-id');
     $.ajax({
-        url: 'student/view/' + student_id,
+        url: 'view/' + student_id,
         type: "GET",
         dataType: 'json',
         success: function (res) {
@@ -308,7 +310,7 @@
                     gradeRes.data.forEach(function(grade) {
                         var row = '<tr>';
                         // Assuming you have a gradeId field
-                        row += '<td class="editable" id="txtSubject" name="txtSubject">' + grade.subject + '</td>';
+                        row += '<td class="editable" id="txtSubject" name="txtSubject">' + grade.subject_name + '</td>';
                         row += '<td class="editable" id="txtGrade" name="txtGrade">' + grade.grade + '</td>';
                         row += '<td><button class="btn btn-danger btnDeleteGrd" data-gradeid="' + grade.grade_id + '">Delete</button> <button class="btn btn-primary btnEditGrd" data-gradeid="' + grade.grade_id + '">Edit</button></td>';
                         row += '</tr>';
@@ -342,7 +344,7 @@
 
                         // Send the updated data to the server
                         $.ajax({
-                            url: 'student/updateGrades/' + grade_id,
+                            url: 'updateGrades/' + grade_id,
                             type: 'POST',
                             dataType: 'json',
                             data: newData,
@@ -420,7 +422,7 @@
        //DELETE STUDENT
     $('body').on('click', '.btnDelete', function () {
         var student_id = $(this).attr('data-id');
-        $.get('student/delete/'+student_id, function (data) {
+        $.get('delete/'+student_id, function (data) {
             $('#studentTable tbody #'+ student_id).remove();
         })
     });  
@@ -428,7 +430,7 @@
         $('body').on('click', '.btnDeleteGrd', function () {
             var grade_id = $(this).attr('data-gradeid');
             var $row = $(this).closest('tr'); // Find the closest row to the clicked button
-            $.get('student/deleteGrades/'+grade_id, function (data) {
+            $.get('deleteGrades/'+grade_id, function (data) {
                 // On success, remove the corresponding row from the table
                 $row.remove();
             });
@@ -446,7 +448,7 @@
          
                 // Send AJAX request
                 $.ajax({
-                    url: 'student/storeGrades',
+                    url: 'storeGrades',
                     type: 'POST',
                     data: formData,
                     dataType: 'json',
